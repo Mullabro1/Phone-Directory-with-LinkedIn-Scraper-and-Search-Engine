@@ -1,0 +1,21 @@
+{
+  "dependencies": {
+    "axios": "^1.7.9",
+    "body-parser": "^1.20.3",
+    "cors": "^2.8.5",
+    "csvtojson": "^2.0.10",
+    "express": "^4.21.2",
+    "fs-extra": "^11.2.0",
+    "multer": "^1.4.5-lts.1",
+    "path": "^0.12.7",
+    "pg": "^8.13.1",
+    "rss-to-json": "^2.1.1",
+    "xlsx": "^0.18.5"
+  },
+  "type": "module",
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/multer": "^1.4.12",
+    "@types/node": "^22.10.2"
+  }
+}

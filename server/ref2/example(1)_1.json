@@ -1,0 +1,32 @@
+[
+  {
+    "url": "https://linkedin.com/in/bhushan-bailamre-316139131",
+    "reference": "dheeraj@test.com",
+    "class": "in person"
+  },
+  {
+    "url": "https://linkedin.com/in/ranc-me-b5572393",
+    "reference": "dheeraj@test.com",
+    "class": "social circle"
+  },
+  {
+    "url": "https://linkedin.com/in/yatish-jagdale-59811686",
+    "reference": "dheeraj@test.com",
+    "class": "refrence"
+  },
+  {
+    "url": "https://linkedin.com/in/mrunmayi-rane-027a12238",
+    "reference": "dheeraj@test.com",
+    "class": "none"
+  },
+  {
+    "url": "https://linkedin.com/in/anurag-murarka-03b9ba50",
+    "reference": "dheeraj@test.com",
+    "class": "in person"
+  },
+  {
+    "url": "https://linkedin.com/in/shekhar-kabra-069392b",
+    "reference": "dheeraj@test.com",
+    "class": "none"
+  }
+]
