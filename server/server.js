@@ -9,6 +9,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import rssToJson from 'rss-to-json';
+import csvParser from 'csv-parser'
 
 const { parse: parseRSS } = rssToJson;
 // Get the current directory using import.meta.url
@@ -183,9 +184,14 @@ app.post('/profile', upload.single('file'), async (req, res) => {
       for (const profileData of profiles) {
         // Insert profile data
         const insertProfileQuery = `
-          INSERT INTO profiles (linkedin_id, name, city, about, current_company, url, avatar, banner_image, followers, connections, reference_text)
-          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id
+        INSERT INTO profiles (
+          linkedin_id, name, city, about, current_company, url, avatar, banner_image, 
+          followers, connections, reference_text, email_1, email_2, contact_1, contact_2, contact_3
+        ) 
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) 
+        RETURNING id
         `;
+
         const profileValues = [
           profileData.linkedin_id,
           profileData.name,
@@ -198,7 +204,13 @@ app.post('/profile', upload.single('file'), async (req, res) => {
           profileData.followers,
           profileData.connections,
           profileData.reference,
+          profileData.email_1,
+          profileData.email_2,
+          profileData.contact_1,
+          profileData.contact_2,
+          profileData.contact_3
         ];
+
 
         const result = await client.query(insertProfileQuery, profileValues);
         const profileId = result.rows[0].id;
@@ -326,6 +338,21 @@ app.get('/sample', (req, res) => {
   }
 });
 
+// Serve the example.csv file
+app.get('/sample2', (req, res) => {
+  const filePath = path.join(__dirname, 'exe', 'example2.csv');
+  
+  if (fs.existsSync(filePath)) {
+    res.download(filePath, 'example2.csv', (err) => {
+      if (err) {
+        res.status(500).send('Error downloading file');
+      }
+    });
+  } else {
+    res.status(404).send('File not found');
+  }
+});
+
 //multipage rss feed
 app.get('/rss', async (req, res) => {
   const urls = [
@@ -393,6 +420,11 @@ app.get('/search', async (req, res) => {
         p.banner_image,
         p.followers,
         p.connections,
+        p.email_1,
+        p.email_2,
+        p.contact_1,
+        p.contact_2,
+        p.contact_3,
         p.reference_text,  -- Include reference_text in the SELECT clause
 
         -- Aggregate all columns from the experiences table
@@ -487,6 +519,11 @@ app.get('/search', async (req, res) => {
         followers: profile.followers,
         connections: profile.connections,
         reference_text: profile.reference_text,  // Added reference_text here
+        email_1: profile.email_1,  // Added email_1
+        email_2: profile.email_2,  // Added email_2
+        contact_1: profile.contact_1,  // Added contact_1
+        contact_2: profile.contact_2,  // Added contact_2
+        contact_3: profile.contact_3,  // Added contact_3
         experiences: experiences,
         education: education
       };
@@ -499,6 +536,57 @@ app.get('/search', async (req, res) => {
     res.status(500).send('Error fetching profiles');
   }
 });
+
+// Route to search profiles based on first name, last name, and city and fetch their education and experiences
+app.get('/search2', async (req, res) => {
+  const { first_name, last_name, city } = req.query;
+
+  try {
+    // Query to find profiles based on first name, last name, and city
+    const result = await client.query(
+      `SELECT * FROM profiles
+       WHERE name ILIKE $1 AND name ILIKE $2 AND city ILIKE $3`, 
+      [`${first_name}%`, `%${last_name}%`, `%${city}%`]
+    );
+
+    const profiles = result.rows; // Extract rows from result
+
+    // If no profiles are found, return an error
+    if (!profiles || profiles.length === 0) {
+      return res.status(404).json({ message: 'No profiles found' });
+    }
+
+    // Fetch education and experiences for the profiles
+    const profilesWithDetails = await Promise.all(profiles.map(async (profile) => {
+      // Get the education for each profile
+      const education = (await client.query(
+        'SELECT * FROM education WHERE profile_id = $1',
+        [profile.id]
+      )).rows;
+
+      // Get the experiences for each profile
+      const experiences = (await client.query(
+        'SELECT * FROM experiences WHERE profile_id = $1',
+        [profile.id]
+      )).rows;
+
+      // Return profile with education and experiences
+      return {
+        ...profile,
+        education,
+        experiences
+      };
+    }));
+
+    // Return the profiles along with education and experiences
+    return res.json(profilesWithDetails);
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: 'Error querying the database' });
+  }
+});
+
 
 // POST /login endpoint
 app.post('/login', async (req, res) => {
@@ -611,6 +699,198 @@ app.get('/suggest', async (req, res) => {
     res.status(500).send('Server Error');
   }
 });
+
+// convert csv to json and upload
+app.post('/convert', upload.single('csvfile'), (req, res) => {
+  if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+  }
+
+  const tempFilePath = path.join(__dirname, req.file.path);
+  const outputFolderPath = path.join(__dirname, '1_update');
+  const outputFilePath = path.join(outputFolderPath, 'output.json');
+
+  if (!fs.existsSync(outputFolderPath)) {
+      fs.mkdirSync(outputFolderPath);
+  }
+
+  const results = [];
+
+  fs.createReadStream(tempFilePath)
+      .pipe(csvParser())
+      .on('data', (data) => {
+          const cleanedData = {};
+
+          for (const key in data) {
+              let value = data[key].trim(); // Trim whitespace
+
+              // Convert empty values to null
+              if (value === '') {
+                  cleanedData[key] = null;
+                  continue;
+              }
+
+              // Fix scientific notation (e.g., "9.82E+11" to "982000000000")
+              if (!isNaN(value) && value.includes('E')) {
+                  cleanedData[key] = Number(value).toString();
+                  continue;
+              }
+
+              // Fix phone numbers: remove invalid characters, ensure proper format
+              if (key.toLowerCase().includes('contact')) {
+                  cleanedData[key] = value.replace(/[^0-9+]/g, ''); // Remove anything except numbers and '+'
+              } else {
+                  cleanedData[key] = value;
+              }
+          }
+
+          results.push(cleanedData);
+      })
+      .on('end', () => {
+          fs.writeFileSync(outputFilePath, JSON.stringify(results, null, 2), 'utf8');
+
+          // Now execute 1_update_profile.js after processing is complete
+          console.log('Executing 1_update_profile.js...');
+          execSync('node 1_update_profile.js', { stdio: 'inherit' });
+          
+
+          res.json({ message: 'File successfully converted to JSON' });
+          
+          fs.unlinkSync(tempFilePath);
+      })
+      .on('error', (err) => {
+          console.error('Error processing CSV file:', err);
+          res.status(500).json({ error: 'Failed to process CSV file' });
+      });
+});
+
+app.get('/out-data', async (req, res) => {
+  try {
+      const outFilePath = path.join(__dirname, '2_update', 'out.json');
+
+      if (!await fs.pathExists(outFilePath)) {
+          return res.status(404).json({ error: 'out.json not found' });
+      }
+
+      const data = await fs.readJson(outFilePath);
+      res.json(data);
+  } catch (error) {
+      console.error('Error reading out.json:', error);
+      res.status(500).json({ error: 'Failed to read out.json' });
+  }
+});
+
+app.get('/no-out-data', async (req, res) => {
+  try {
+      const outFilePath = path.join(__dirname, '2_update', 'not_found.json');
+
+      if (!await fs.pathExists(outFilePath)) {
+          return res.status(404).json({ error: 'out.json not found' });
+      }
+
+      const data = await fs.readJson(outFilePath);
+      res.json(data);
+  } catch (error) {
+      console.error('Error reading out.json:', error);
+      res.status(500).json({ error: 'Failed to read out.json' });
+  }
+});
+
+app.post("/append-records", async (req, res) => {
+  const { profileId } = req.body; // Get profile.id from request
+
+  if (!profileId) {
+    return res.status(400).json({ success: false, message: "Missing profileId" });
+  }
+
+  try {
+    // Read out.json
+    const outFilePath = path.join(__dirname, "2_update", "out.json");
+    const outData = JSON.parse(fs.readFileSync(outFilePath, "utf8"));
+
+    // Find matching record
+    const matchingRecord = outData.find((entry) =>
+      entry.profiles.some((p) => p.id === profileId)
+    );
+
+    if (!matchingRecord) {
+      return res.status(404).json({ success: false, message: "Record not found for the given profileId" });
+    }
+
+    // Extract required data
+    const { email_1, email_2, contact_1, contact_2, contact_3 } = matchingRecord.record;
+
+    // Update database using client instead of pool
+    const updateQuery = `
+      UPDATE profiles
+      SET email_1 = $1, email_2 = $2, contact_1 = $3, contact_2 = $4, contact_3 = $5
+      WHERE id = $6;
+    `;
+
+    await client.query(updateQuery, [email_1, email_2, contact_1, contact_2, contact_3, profileId]);
+
+    // Remove matching entries from JSON file
+    const updatedOutData = outData.filter((entry) =>
+      !entry.profiles.some((p) => p.id === profileId)
+    );
+
+    // Write updated JSON data back to file
+    fs.writeFileSync(outFilePath, JSON.stringify(updatedOutData, null, 2), "utf8");
+
+    res.json({ success: true, message: "Profile updated successfully, and JSON entries deleted!" });
+  } catch (error) {
+    console.error("Error processing request:", error);
+    res.status(500).json({ success: false, message: "Error updating profile." });
+  }
+});
+
+app.post("/update-profile", async (req, res) => {
+  console.log("Received request to /update-profile");
+  console.log("Request body:", req.body);
+
+  const { id, profile_id, table_name, column_name, new_value } = req.body;
+
+  if (!table_name || !column_name || new_value === undefined) {
+    console.log("Missing required fields");
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  let query;
+  let values;
+
+  try {
+    if (table_name === "profiles") {
+      // If updating the main profile, use only profile_id
+      query = `UPDATE profiles SET ${column_name} = $1 WHERE id = $2 RETURNING *`;
+      values = [new_value, profile_id];
+    } else if (table_name === "education" || table_name === "experiences") {
+      // If updating education or experience, use both id & profile_id
+      query = `UPDATE ${table_name} SET ${column_name} = $1 WHERE profile_id = $2 AND id = $3 RETURNING *`;
+      values = [new_value, profile_id, id];
+    } else {
+      console.log("Invalid table name:", table_name);
+      return res.status(400).json({ error: "Invalid table name" });
+    }
+
+    console.log("Executing query:", query);
+    console.log("Query values:", values);
+
+    const result = await client.query(query, values);
+
+    if (result.rowCount === 0) {
+      console.log(`No record found in ${table_name} for ID:`, id || profile_id);
+      return res.status(404).json({ error: "Record not found" });
+    }
+
+    //console.log("Update successful:", result.rows[0]);
+    res.json({ message: "Update successful", profile: result.rows[0] });
+
+  } catch (err) {
+    console.error("Update error:", err);
+    res.status(500).json({ error: "Database error" });
+  }
+});
+
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

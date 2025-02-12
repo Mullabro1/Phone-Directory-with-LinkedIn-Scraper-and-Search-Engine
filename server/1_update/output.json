@@ -1,0 +1,35 @@
+[
+  {
+    "first_name": "aymaan",
+    "middle_name": "abdul munaf",
+    "last_name": "mulla",
+    "email_1": "mullaayman@test.com",
+    "email_2": "aymaan@gmail.com",
+    "contact_1": "982000000000",
+    "contact_2": "8779157658",
+    "contact_3": "6555566511",
+    "city_and_place": "india"
+  },
+  {
+    "first_name": null,
+    "middle_name": null,
+    "last_name": "khatri",
+    "email_1": "khatri@test.com",
+    "email_2": null,
+    "contact_1": "9999999999",
+    "contact_2": null,
+    "contact_3": null,
+    "city_and_place": "india"
+  },
+  {
+    "first_name": "aarti",
+    "middle_name": null,
+    "last_name": null,
+    "email_1": "test@test.com",
+    "email_2": null,
+    "contact_1": "888888888",
+    "contact_2": null,
+    "contact_3": null,
+    "city_and_place": "india"
+  }
+]

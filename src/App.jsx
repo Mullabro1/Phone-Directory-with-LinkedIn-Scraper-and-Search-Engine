@@ -8,6 +8,10 @@ import UserManagement from './components/UserManagement.jsx';
 import Navbar from './navbar.jsx';
 import NextPageButton from './components/next.jsx';
 import ListComponent from './components/list.jsx';
+import UploadCsv from './components/update.jsx';
+import OutDataTable from './components/out.jsx';
+import OutDataTable2 from './components/out2.jsx';
+import SearchComponent2 from './components/search2.jsx';
 
 // Admin Dashboard Navigation Component
 function AdminDashboard() {
@@ -31,6 +35,12 @@ function AdminDashboard() {
           >
             Password Management
           </button>
+          <button 
+            className="w-48 py-2 bg-red-600 text-white rounded-md shadow-md hover:bg-red-700 transition"
+            onClick={() => navigate('/admin/update')}
+          >
+            profile update
+          </button>
         </div>
 
         <button 
@@ -39,6 +49,31 @@ function AdminDashboard() {
         >
           Logout
         </button>
+      </div>
+    </div>
+  );
+}
+
+function UpdatePanel() {
+  const navigate = useNavigate();
+  return (
+    <div className="min-h-screen flex flex-col justify-center items-center bg-gray-100">
+      <div className="text-center">
+        <h1 className="text-3xl font-bold text-red-600 mb-6">update Dashboard</h1>
+        <div className="flex justify-center items-center gap-5">
+          <button 
+            className="w-48 py-2 bg-red-600 text-white rounded-md shadow-md hover:bg-red-700 transition"
+            onClick={() => navigate('/admin/up')}
+          >
+            Update contacts
+          </button>
+          <button 
+            className="w-48 py-2 bg-red-600 text-white rounded-md shadow-md hover:bg-red-700 transition"
+            onClick={() => navigate('/admin/down')}
+          >
+            Database updates
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -91,6 +126,82 @@ const PinInput = () => {
   );
 };
 
+const Updash = () => {
+  const navigate = useNavigate();
+
+  return (
+    <div className="flex justify-center min-h-[10px]">
+          <button 
+              className="px-6 py-3 bg-red-600 text-white rounded-lg shadow-md hover:bg-white hover:text-red-600 border-2 border-red-600 transition"
+              onClick={() => navigate('/admin/files1')}
+          >
+              Duplicate Records
+          </button>
+      </div>
+  );
+};
+
+const Downdash = () => {
+  const navigate = useNavigate();
+
+  return (
+    <div className="flex justify-center min-h-[10px]">
+      <button 
+        className="px-6 py-3 bg-red-600 text-white rounded-lg shadow-md hover:bg-white hover:text-red-600 border-2 border-red-600 transition"
+        onClick={() => navigate('/admin/files2')}
+      >
+        Unsuccessful Records
+      </button>
+    </div>
+  );
+};
+
+// PinInput Component
+const PinInput2 = () => {
+  const [pin, setPin] = useState('');
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
+
+  const correctPin = '985621';
+
+  const handleChange = (e) => {
+    setPin(e.target.value);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (pin === correctPin) {
+      navigate('/admin/db');  // Navigate to the next page if PIN is correct
+    } else {
+      setError('Invalid login');
+    }
+  };
+
+  return (
+    <div className="flex items-center justify-center h-screen bg-gray-100">
+      <div className="bg-white shadow-lg p-8 rounded-md">
+        <form onSubmit={handleSubmit} className="text-center">
+          <h1 className="text-2xl font-bold mb-4">Enter PIN</h1>
+          <input
+            type="password"
+            maxLength="6"
+            value={pin}
+            onChange={handleChange}
+            className="border border-gray-300 p-2 w-full text-center text-lg rounded-md mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Enter 6-digit PIN"
+          />
+          <button
+            type="submit"
+            className="bg-red-500 text-white py-2 px-4 rounded-md hover:bg-white hover:text-red-500 border border-red-500 transition"
+          >
+            Submit
+          </button>
+          {error && <p className="text-red-500 mt-4">{error}</p>}
+        </form>
+      </div>
+    </div>
+  );
+};
 // User Dashboard
 function UserDashboard() {
   const { username } = useContext(AuthContext);
@@ -118,6 +229,43 @@ function UserDashboard() {
     </div>
   );
 }
+
+const UpdateOptionDashboard = () => {
+  return (
+    <div className="min-h-screen flex flex-col justify-center items-center bg-gray-100 p-4">
+    {/* Title */}
+    <h1 className="text-3xl font-bold text-red-600 mb-6">Update Options</h1>
+
+    <div className="bg-white p-2 rounded-lg shadow-md w-full">
+        {/* Upload CSV Section */}
+        <div className="mb-6 text-center">
+            <h2 className="text-xl font-semibold text-gray-700 mb-3">Upload CSV</h2>
+            <div className="flex justify-center">
+                <UploadCsv />
+            </div>
+        </div>
+
+        {/* Horizontal Divider */}
+        <div className="border-t border-gray-300 my-6"></div> 
+
+        {/* Duplicate Records Section */}
+        <div className="text-center">
+            <h2 className="text-xl font-semibold text-gray-700 mb-3">Duplicate Records</h2>
+            <div className="flex justify-center">
+                <Updash />
+            </div>
+        </div>
+                    {/* Records Section */}
+                    <div className="text-center">
+                        <h2 className="text-xl font-semibold text-gray-700 mb-3">unsuccesful Records</h2>
+                        <div className="flex justify-center">
+                            <Downdash/>
+                        </div>
+                    </div>
+    </div>
+</div>
+  );
+};
 
 function Base() {
   const { logout } = useContext(AuthContext);
@@ -181,6 +329,12 @@ function App() {
               } />
               <Route path="/admin/pass" element={<><Navbar /> <PinInput /></>} />
               <Route path="/admin/re-pass" element={<><Navbar /> <UserManagement /></>} />
+              <Route path='/admin/update' element={<><Navbar/> <UpdatePanel/> </>}/>
+              <Route path='/admin/down' element={<><Navbar/> <PinInput2/> </>}/>
+              <Route path='/admin/up' element={<><Navbar/><UpdateOptionDashboard/></>}/>
+              <Route path='/admin/db' element={<><Navbar/> <SearchComponent2/> </>}/>
+              <Route path='/admin/files1' element={<><Navbar/> <OutDataTable/></>}/>
+              <Route path='/admin/files2' element={<><Navbar/> <OutDataTable2/></>}/>
             </>
           )}
 

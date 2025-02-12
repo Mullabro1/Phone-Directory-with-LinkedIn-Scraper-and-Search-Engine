@@ -44,6 +44,30 @@ CREATE TABLE profiles (
   reference_text TEXT,
   search_vector tsvector
 );
+-- Create the profiles table with the reference_text and search_vector for full-text search
+CREATE TABLE profiles (
+  id SERIAL PRIMARY KEY,
+  linkedin_id TEXT,
+  name TEXT,
+  city TEXT,
+  about TEXT,
+  current_company TEXT,
+  url TEXT,
+  avatar TEXT,
+  banner_image TEXT,
+  followers INT,
+  connections INT,
+  reference_text TEXT,  -- New searchable reference_text column
+  -- Add a tsvector column for full-text search
+  search_vector tsvector,
+  -- New columns for emails and contacts
+  email_1 TEXT,
+  email_2 TEXT,
+  contact_1 TEXT,
+  contact_2 TEXT,
+  contact_3 TEXT
+);
+
 
 CREATE INDEX idx_search_vector_profiles ON profiles USING gin(search_vector);
 ```
@@ -336,8 +360,15 @@ CREATE TABLE profiles (
   connections INT,
   reference_text TEXT,  -- New searchable reference_text column
   -- Add a tsvector column for full-text search
-  search_vector tsvector
+  search_vector tsvector,
+  -- New columns for emails and contacts
+  email_1 TEXT,
+  email_2 TEXT,
+  contact_1 TEXT,
+  contact_2 TEXT,
+  contact_3 TEXT
 );
+
 
 -- Create GIN index on the search_vector column for fast searching
 CREATE INDEX idx_search_vector_profiles ON profiles USING gin(search_vector);
@@ -476,13 +507,13 @@ CREATE TABLE classic (
 );
 --table between for api
 CREATE TABLE search_from_refs (
-    id BIGSERIAL PRIMARY KEY,   -- Auto-increment ID for this table
-    name TEXT,                  -- From profiles.name
-    city TEXT,                  -- From profiles.city
-    avatar TEXT,                -- From profiles.avatar
-    reference TEXT,             -- From refs.reference
-    ref_id INT,                 -- From refs.ref_id
-    class TEXT,                 -- From classic.class
-    url TEXT,                   -- From classic.url
-    class_id INT                -- From classic.class_id
+   id BIGSERIAL PRIMARY KEY,   -- Auto-increment ID for this table
+    name TEXT,                 -- From profiles.name
+    city TEXT,                 -- From profiles.city
+    avatar TEXT,               -- From profiles.avatar
+    reference TEXT,            -- From refs.reference
+    ref_id INT,                -- From refs.ref_id
+    class TEXT,                -- From classic.class
+    url TEXT,                  -- From classic.url
+    class_id INT               -- From classic.class_id
 );

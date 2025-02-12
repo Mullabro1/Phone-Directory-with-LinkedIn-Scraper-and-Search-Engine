@@ -587,7 +587,6 @@ const SearchComponent = ({isSidebarVisible,setIsSidebarVisible}) => {
             />
             <h3 className="text-2xl font-bold text-center mt-2">{selectedProfile.name}</h3>
             <p className="text-center text-gray-600">{selectedProfile.city}</p>
-            <p><strong>ID no:</strong> {selectedProfile.id}</p>
             <p><strong>About:</strong> {selectedProfile.about}</p>
             <p><strong>Current Company:</strong> <a href={selectedProfile.current_company} target="_blank" rel="noopener noreferrer" className="text-blue-500">
               {selectedProfile.current_company}</a></p>
@@ -599,6 +598,8 @@ const SearchComponent = ({isSidebarVisible,setIsSidebarVisible}) => {
             </p>
             <p><strong>Followers:</strong> {selectedProfile.followers}</p>
             <p><strong>Connections:</strong> {selectedProfile.connections}</p>
+            <p><strong>email:</strong> {selectedProfile.email_1}<strong> : </strong> {selectedProfile.email_2}</p>
+            <p><strong>Contact:</strong> {selectedProfile.contact_1}<strong> : </strong> {selectedProfile.contact_2}<strong> : </strong>{selectedProfile.contact_3}</p>
             <p><strong>Reference:</strong> {selectedProfile.reference_text}</p>
 
             {/* Render Experiences */}
