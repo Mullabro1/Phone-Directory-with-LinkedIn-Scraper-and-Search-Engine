@@ -12,8 +12,8 @@ const GoogleNews = () => {
   const [loading, setLoading] = useState(true);
 
   // Updated to fetch from the local server
-  const newsFeedUrl = 'http://localhost:5000/rss'; // Endpoint for interleaved articles
-
+  const newsFeedUrl = `${import.meta.env.VITE_API_BASE_URL}/rss`;
+  
   useEffect(() => {
     const fetchNews = async () => {
       try {

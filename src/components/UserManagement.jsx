@@ -12,7 +12,7 @@ const UserManagement = () => {
 
   const fetchUsers = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/dashboard');
+      const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/dashboard`);
       setUsers(res.data);
     } catch (error) {
       console.error('Failed to fetch users');
@@ -22,7 +22,7 @@ const UserManagement = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/dashboard/addUser', form);
+      await axios.post(`${import.meta.env.VITE_API_BASE_URL}/dashboard/addUser`, form);
       setForm({ username: '', password: '', privilege: '' });
       fetchUsers();
     } catch (error) {
@@ -32,7 +32,7 @@ const UserManagement = () => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/dashboard/deleteUser/${id}`);
+      await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/dashboard/deleteUser/${id}`);
       fetchUsers(); // Refresh the user list after deletion
     } catch (error) {
       console.error('Failed to delete user');

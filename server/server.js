@@ -408,66 +408,88 @@ app.get('/search', async (req, res) => {
 
   // Prepare the SQL query text with dynamic table joins for experiences and education
   const queryText = `
+    WITH experience_grouped AS (
     SELECT 
-        p.id,
-        p.linkedin_id,
-        p.name,
-        p.city,
-        p.about,
-        p.current_company,
-        p.url,
-        p.avatar,
-        p.banner_image,
-        p.followers,
-        p.connections,
-        p.email_1,
-        p.email_2,
-        p.contact_1,
-        p.contact_2,
-        p.contact_3,
-        p.reference_text,  -- Include reference_text in the SELECT clause
+        e.profile_id,
+        ARRAY_AGG(e.id ORDER BY e.id) AS experience_ids,
+        ARRAY_AGG(e.title ORDER BY e.id) AS experience_titles,
+        ARRAY_AGG(e.company ORDER BY e.id) AS experience_companies,
+        ARRAY_AGG(e.company_id ORDER BY e.id) AS experience_company_ids,
+        ARRAY_AGG(e.company_url ORDER BY e.id) AS experience_company_urls,
+        ARRAY_AGG(e.company_logo_url ORDER BY e.id) AS experience_company_logos,
+        ARRAY_AGG(e.start_date ORDER BY e.id) AS experience_start_dates,
+        ARRAY_AGG(e.end_date ORDER BY e.id) AS experience_end_dates,
+        ARRAY_AGG(e.description ORDER BY e.id) AS experience_descriptions,
+        ARRAY_AGG(e.duration ORDER BY e.id) AS experience_durations
+    FROM experiences e
+    GROUP BY e.profile_id
+), 
 
-        -- Aggregate all columns from the experiences table
-        ARRAY_AGG(DISTINCT e.id) AS experience_ids,
-        ARRAY_AGG(DISTINCT e.title) AS experience_titles,
-        ARRAY_AGG(DISTINCT e.company) AS experience_companies,
-        ARRAY_AGG(DISTINCT e.company_id) AS experience_company_ids,
-        ARRAY_AGG(DISTINCT e.company_url) AS experience_company_urls,
-        ARRAY_AGG(DISTINCT e.company_logo_url) AS experience_company_logos,
-        ARRAY_AGG(DISTINCT e.start_date) AS experience_start_dates,
-        ARRAY_AGG(DISTINCT e.end_date) AS experience_end_dates,
-        ARRAY_AGG(DISTINCT e.description) AS experience_descriptions,
-        ARRAY_AGG(DISTINCT e.duration) AS experience_durations,
+education_grouped AS (
+    SELECT 
+        ed.profile_id,
+        ARRAY_AGG(ed.id ORDER BY ed.id) AS education_ids,
+        ARRAY_AGG(ed.title ORDER BY ed.id) AS education_titles,
+        ARRAY_AGG(ed.institute_name ORDER BY ed.id) AS education_institute_names,
+        ARRAY_AGG(ed.institute_logo_url ORDER BY ed.id) AS education_institute_logos,
+        ARRAY_AGG(ed.start_year ORDER BY ed.id) AS education_start_years,
+        ARRAY_AGG(ed.end_year ORDER BY ed.id) AS education_end_years,
+        ARRAY_AGG(ed.description ORDER BY ed.id) AS education_descriptions
+    FROM education ed
+    GROUP BY ed.profile_id
+)
 
-        -- Aggregate all columns from the education table
-        ARRAY_AGG(DISTINCT ed.id) AS education_ids,
-        ARRAY_AGG(DISTINCT ed.title) AS education_titles,
-        ARRAY_AGG(DISTINCT ed.institute_name) AS education_institute_names,
-        ARRAY_AGG(DISTINCT ed.institute_logo_url) AS education_institute_logos,
-        ARRAY_AGG(DISTINCT ed.start_year) AS education_start_years,
-        ARRAY_AGG(DISTINCT ed.end_year) AS education_end_years,
-        ARRAY_AGG(DISTINCT ed.description) AS education_descriptions,
+SELECT 
+    p.id,
+    p.linkedin_id,
+    p.name,
+    p.city,
+    p.about,
+    p.current_company,
+    p.url,
+    p.avatar,
+    p.banner_image,
+    p.followers,
+    p.connections,
+    p.email_1,
+    p.email_2,
+    p.contact_1,
+    p.contact_2,
+    p.contact_3,
+    p.reference_text,
 
-        -- Example additional fields for better representation
-        MAX(e.company_url) AS example_company_url,  -- Example field for company URL
-        MAX(ed.institute_logo_url) AS example_institute_logo_url -- Example field for institute logo URL
+    -- Join pre-grouped experiences
+    eg.experience_ids,
+    eg.experience_titles,
+    eg.experience_companies,
+    eg.experience_company_ids,
+    eg.experience_company_urls,
+    eg.experience_company_logos,
+    eg.experience_start_dates,
+    eg.experience_end_dates,
+    eg.experience_descriptions,
+    eg.experience_durations,
 
-    FROM 
-        profiles p
-    LEFT JOIN experiences e 
-        ON e.profile_id = p.id
-    LEFT JOIN education ed 
-        ON ed.profile_id = p.id
+    -- Join pre-grouped education
+    edg.education_ids,
+    edg.education_titles,
+    edg.education_institute_names,
+    edg.education_institute_logos,
+    edg.education_start_years,
+    edg.education_end_years,
+    edg.education_descriptions
 
-    WHERE 
-        p.search_vector @@ plainto_tsquery('english', $1)  -- Profile search term
-        OR e.search_vector @@ plainto_tsquery('english', $1)  -- Experience search term
-        OR ed.search_vector @@ plainto_tsquery('english', $1)  -- Education search term
+FROM profiles p
+LEFT JOIN experience_grouped eg ON eg.profile_id = p.id
+LEFT JOIN education_grouped edg ON edg.profile_id = p.id
 
-    GROUP BY 
-        p.id
-    ORDER BY 
-        p.id;
+WHERE 
+    p.search_vector @@ plainto_tsquery('english', $1)
+    OR EXISTS (SELECT 1 FROM experiences e2 WHERE e2.profile_id = p.id AND e2.search_vector @@ plainto_tsquery('english', $1))
+    OR EXISTS (SELECT 1 FROM education ed2 WHERE ed2.profile_id = p.id AND ed2.search_vector @@ plainto_tsquery('english', $1))
+
+ORDER BY 
+    p.id;
   `;
 
   // Prepare the query params for parameterized queries (only using $1)

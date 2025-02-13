@@ -34,7 +34,7 @@ const SearchComponent = ({isSidebarVisible,setIsSidebarVisible}) => {
       if (availableSuggestions.length === 0) {
         // Fetch suggestions if not already fetched
         try {
-          const response = await fetch('http://localhost:5000/suggest'); // Adjust the URL if needed
+          const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/suggest`); // Adjust the URL if needed
           if (!response.ok) {
             throw new Error('Failed to fetch suggestions');
           }
@@ -61,7 +61,7 @@ const SearchComponent = ({isSidebarVisible,setIsSidebarVisible}) => {
   const initializeSuggestions = async () => {
     if (availableSuggestions.length === 0) {
       try {
-        const response = await fetch('http://localhost:5000/suggest'); // Adjust URL as needed
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/suggest`); // Adjust URL as needed
         if (!response.ok) {
           throw new Error('Failed to fetch suggestions');
         }
@@ -84,7 +84,7 @@ const SearchComponent = ({isSidebarVisible,setIsSidebarVisible}) => {
     e.preventDefault();
     try {
       // Build the query string based on search parameters for the search endpoint
-      let queryString = `http://localhost:5000/search?`;
+      let queryString = `${import.meta.env.VITE_API_BASE_URL}/search?`;
       if (name) {
         queryString += `searchQuery=${encodeURIComponent(name)}`;
       }
@@ -92,7 +92,7 @@ const SearchComponent = ({isSidebarVisible,setIsSidebarVisible}) => {
       console.log(queryString); // Log query for debugging
 
       // Build the query string for the optional front2 endpoint
-      let queryString2 = `http://localhost:5000/front2?`;
+      let queryString2 = `${import.meta.env.VITE_API_BASE_URL}/front2?`;
       if (name) {
         queryString2 += `reference=${name}`;
       }
@@ -134,7 +134,7 @@ const SearchComponent = ({isSidebarVisible,setIsSidebarVisible}) => {
       };
       let mergedData2;
        // Check if data1 is empty
-       if (data1.length === 0) {
+       if (data1.length <= 20) {
         console.log('No results found in search');
 
         // We already have data2 from the fetch, so no need to repeat this logic outside
@@ -145,7 +145,7 @@ const SearchComponent = ({isSidebarVisible,setIsSidebarVisible}) => {
         console.log("data2:",data2)
         for (const item of data2) {
           const nameFromData2 = item.name;  // Extract the name from each item in data2
-          const queryStringForName = `http://localhost:5000/search?searchQuery=${encodeURIComponent(nameFromData2)}`;
+          const queryStringForName = `${import.meta.env.VITE_API_BASE_URL}/search?searchQuery=${encodeURIComponent(nameFromData2)}`;
 
           const searchResponse = await fetch(queryStringForName);
           if (searchResponse.ok) {

@@ -4,7 +4,7 @@ const OutDataTable2 = () => {
   const [data, setData] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:5000/no-out-data")
+    fetch(`${import.meta.env.VITE_API_BASE_URL}/no-out-data`)
       .then((res) => res.json())
       .then((json) => setData(json))
       .catch((err) => console.error("Error fetching data:", err));

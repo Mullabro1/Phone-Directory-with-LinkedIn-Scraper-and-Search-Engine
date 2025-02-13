@@ -85,7 +85,7 @@ const PinInput = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const correctPin = '985621';
+  const correctPin = import.meta.env.VITE_CORRECT_PIN;
 
   const handleChange = (e) => {
     setPin(e.target.value);
@@ -162,7 +162,7 @@ const PinInput2 = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const correctPin = '985621';
+  const correctPin = import.meta.env.VITE_CORRECT_PIN;
 
   const handleChange = (e) => {
     setPin(e.target.value);

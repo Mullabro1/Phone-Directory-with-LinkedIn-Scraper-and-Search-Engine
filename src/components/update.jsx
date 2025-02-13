@@ -19,7 +19,7 @@ const UploadCsv = () => {
         formData.append('csvfile', file);
 
         try {
-            const { data } = await axios.post('http://localhost:5000/convert', formData, {
+            const { data } = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/convert`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
             // Store the message directly
@@ -32,7 +32,7 @@ const UploadCsv = () => {
     const handleDownloadSample = async () => {
         try {
             // Request to download the sample file
-            const response = await axios.get('http://localhost:5000/sample2', {
+            const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/sample2`, {
                 responseType: 'blob',
             });
 

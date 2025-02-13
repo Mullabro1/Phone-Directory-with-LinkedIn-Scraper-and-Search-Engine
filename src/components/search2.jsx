@@ -28,7 +28,7 @@ const SearchComponent2 = () => {
     const query = `first_name=${first_name}&last_name=${last_name}&city=${city}`;
 
     try {
-      const response = await fetch(`http://localhost:5000/search2?${query}`);
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/search2?${query}`);
       const data = await response.json();
 
       if (response.ok) {
@@ -71,7 +71,7 @@ const SearchComponent2 = () => {
     const newValue = updatedData[key];
     console.log(newValue);
     try {
-      const response = await fetch("http://localhost:5000/update-profile", {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/update-profile`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

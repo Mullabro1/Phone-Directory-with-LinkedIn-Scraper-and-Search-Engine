@@ -28,7 +28,7 @@ const ProfileUpload = () => {
     setStatus("");
 
     try {
-      const response = await axios.post("http://localhost:5000/profile", formData, {
+      const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/profile`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -52,7 +52,7 @@ const ProfileUpload = () => {
   // Function to fetch the dead URLs
   const fetchDeadUrls = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/dead_url");
+      const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/dead_url`);
       setDeadUrls(response.data); // Set the fetched dead URLs into the state
     } catch (error) {
       console.error("Error fetching dead URLs:", error);

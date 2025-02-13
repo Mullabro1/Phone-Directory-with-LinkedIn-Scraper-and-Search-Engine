@@ -9,7 +9,7 @@ const NextPageButton = () => {
   const handleClick = async () => {
     try {
       // Call the Express function to delete files using axios
-      const response = await axios.post('http://localhost:5000/del_all');
+      const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/del_all`);
       
       if (response.status === 200) {
         // Navigate to /admin/re-profile after successful deletion
@@ -26,7 +26,7 @@ const NextPageButton = () => {
   const handleDownload = async () => {
     try {
       // Call the Express function to download the example CSV file from localhost:5000
-      const response = await axios.get('http://localhost:5000/sample', { responseType: 'blob' });
+      const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/sample`, { responseType: 'blob' });
 
       if (response.status === 200) {
         const blob = response.data;

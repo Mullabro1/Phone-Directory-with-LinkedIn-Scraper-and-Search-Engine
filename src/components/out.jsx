@@ -4,7 +4,7 @@ const OutDataTable = () => {
   const [data, setData] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:5000/out-data")
+    fetch(`${import.meta.env.VITE_API_BASE_URL}/out-data`)
       .then((res) => res.json())
       .then((json) => setData(json))
       .catch((err) => console.error("Error fetching data:", err));
@@ -12,7 +12,7 @@ const OutDataTable = () => {
 
   const handleAppendRecords = async (profileId) => {
     try {
-      const response = await fetch("http://localhost:5000/append-records", {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/append-records`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
