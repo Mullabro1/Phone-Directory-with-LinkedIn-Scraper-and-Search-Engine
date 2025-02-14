@@ -134,7 +134,7 @@ const SearchComponent = ({isSidebarVisible,setIsSidebarVisible}) => {
       };
       let mergedData2;
        // Check if data1 is empty
-       if (data1.length <= 20) {
+       if (Object.keys(data1).length <= 20) {
         console.log('No results found in search');
 
         // We already have data2 from the fetch, so no need to repeat this logic outside

@@ -12,7 +12,7 @@ const __dirname = path.dirname(__filename);
 const outputFolder = path.join(__dirname, 'fol_1');
 const csvFolder = path.join(__dirname, 'fol_2'); // Folder for the CSV
 const baseUrl = "https://api.brightdata.com/datasets/v3";
-const apiToken = "Bearer f1b61134-8d48-4249-8e40-985abf38841d";
+const apiToken = "Bearer";
 const headers = {
     "Authorization": apiToken,
     "Content-Type": "application/json"
