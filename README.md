@@ -342,6 +342,44 @@ npm start
 ---
 
 Feel free to customize the ports or other configurations in the `docker-compose.yml` or `.env` file.
+# Updating API Token for Bright Data
+## Overview
+This guide explains how to update the `apiToken` in your code to use the correct Bearer token provided by Bright Data.
+## Steps to Update the API Token
+1. **Locate the Configuration File**  
+   Open the file where `apiToken` is defined. Typically, it will be in a configuration or script file.
+2. **Find the Current `apiToken` Definition**  
+   Look for the following line in your code:
+   ```javascript
+   const apiToken = "Bearer ";
+   ```
+3. **Replace with the Provided Token**  
+   Update the line with the correct Bearer token from Bright Data. Example:
+   ```javascript
+   const apiToken = "Bearer f1b61134-8d48-4249-8e40-985abfhshsh";
+   ```
+4. **Save and Close the File**  
+   After updating the token, save the file and exit.
+5. **Restart the Application** *(if necessary)*  
+   Some applications may require a restart for the changes to take effect.
+## Security Best Practices
+- **Never expose API tokens in public repositories.**
+- **Use environment variables** instead of hardcoding API tokens in source code.
+- **Store tokens securely**, such as in a `.env` file or a secrets manager.
+## Example Using Environment Variables
+Instead of hardcoding, use environment variables:
+### **1. Store Token in `.env` File**
+```
+BRIGHT_DATA_API_TOKEN=Bearer f1b61134-8d48-4249-8e40-985abf38841d
+```
+### **2. Load Token in Code**
+```javascript
+require('dotenv').config();
+const apiToken = process.env.BRIGHT_DATA_API_TOKEN;
+```
+By following this method, you improve security and prevent accidental exposure of sensitive information.(pls check main.js in server folder)
+---
+Your API token is now correctly set up for Bright Data! 🚀
 
 ## profiles table setup
 ```sql
